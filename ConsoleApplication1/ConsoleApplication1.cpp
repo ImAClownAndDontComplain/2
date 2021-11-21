@@ -11,8 +11,11 @@ string liveliness(bool alive) {
 class Something {
 protected:
 	string name;
-	int age;                            
+	int age;
 public:
+	virtual void show_main() {
+		printf("Here is nothing :(\n");
+	}
 	Something() {
 		printf("Something()\n");
 		name = "default", age = 0;
@@ -45,7 +48,7 @@ protected:
 	Something* S2;
 public:
 	Heap(){
-		printf("Heap()");
+		printf("Heap()\n");
 		S1 = new Something();
 		S2 = new Something();
 	}
@@ -58,7 +61,7 @@ public:
 		S1 = new Something(*(H.S1)), S2 = new Something(*(H.S2));
 	}
 	~Heap() {
-		printf("\n~Heap()\n");
+		printf("~Heap()\n");
 		delete S1;
 		delete S2;
 	}
@@ -67,6 +70,9 @@ public:
 class Someone : public Something {
 private: bool alive;
 public:
+	void show_main() override {
+		printf("The main prorerty is liveliness\n");
+	}
 	Someone() : Something() {
 		printf("Someone()\n");
 		alive = true;
@@ -88,38 +94,98 @@ public:
 	}
 };
 
+class SomethingMeasured : public Something {     //a class without constructors & destructor
+private: int size;
+public:
+	void show_main() override {
+		printf("The main prorerty is size\n");
+	}
+};
+
 int main()
 {
 	//
+
 	printf("Static creation of Something:\n");
 	Something s1;
 	Something s2("abc", 1);
 	Something s3(s2);
+
 	//
+
 	printf("\n\nDynamic creation of Something:\n");
 	Something* s4 = new Something();
 	Something* s5 = new Something("def",2);
 	Something* s6 = new Something(*s5);
 	s6->rename("defg");
 	s6->resetC();
+
 	//
+
 	printf("\n\nDeleting dynamically created Something:\n");
 	delete s4;
 	delete s5;
 	delete s6;
+
 	//
-	printf("\n\nStatic creation of Someone:\n");
+
+	printf("\n\nStatic creation of Someones:\n");
 	Someone _s1;
 	Someone _s2("hij", 3,true);
 	Someone _s3(_s2);
-	printf("\n\nDynamic creation of Someone & putting Someone into the variable of the class Something:\n");
+	//
+
+	printf("\n\nDynamic creation of Someones & putting Someone into the variable of the class Something:\n");
 	Someone* _s4 = new Someone("klm", 4,true);  //each time both of Somathing's and Someone's constructors are called
 	Something* _s5 = new Someone(*_s4);
 	_s4->changeliveliness(false);               //_s5 doesn't have such method since it's still Something
-	printf("\n\nDeleting dynamically created Someone:\n");
+
+	//
+
+	printf("\n\nDeleting dynamically created Someones:\n");
 	printf("   Deleting _s4:\n");
 	delete _s4;
 	printf("   Deleting _s5:\n");               //only Something's destructor is called
 	delete _s5;
-	printf("\n\nDeleting statically created Someone and Something:\n");
+
+	//
+
+	printf("\n\nStatic creation of Heaps:\n");
+	Heap H1;
+	Heap H2(H1);
+
+	//
+
+	printf("\n\nDynamic creation of Heaps:\n");
+	Heap *H3 = new Heap();
+	Heap *H4 = new Heap(*H3);
+
+	//
+
+	printf("\n\nDeleting dynamically created Heaps\n");
+	printf("   Deleting H3:\n"); 
+	delete H3;
+	printf("   Deleting H4:\n"); 
+	delete H4;
+
+	//
+
+	printf("\n\nStatic & dynamic creation of SomethingMeasured, deleting dynamically created SomethingMeasured:\n");
+	SomethingMeasured M1;  
+	Something* M2 = new SomethingMeasured;
+	SomethingMeasured* M3 = new SomethingMeasured;     //in all cases Something's default constructor is called
+	delete M2;                                        
+	delete M3;                                         //in both cases Something's destructor is called
+
+	//
+
+	printf("\n\nCreating different versions of Something\n");
+	Something A1;
+	Something *A2 = new Someone();
+	Something *A3 = new SomethingMeasured();
+	printf("\n\nUsing overrided virtual method of each Something\n");
+	A1.show_main();
+	A2->show_main();
+	A3->show_main();
+	printf("\n\nDeleting statically created Someones, Something, Heaps:\n");
 }
