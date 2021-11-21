@@ -95,7 +95,7 @@ public:
 };
 
 class SomethingMeasured : public Something {     //a class without constructors & destructor
-private: int size;
+private: int size=0;
 public:
 	void show_main() override {
 		printf("The main prorerty is size\n");
@@ -137,17 +137,17 @@ int main()
 
 	printf("\n\nDynamic creation of Someones & putting Someone into the variable of the class Something:\n");
 	Someone* _s4 = new Someone("klm", 4,true);  //each time both of Somathing's and Someone's constructors are called
+	_s4->changeliveliness(false);               //_s5 will not have such method since it'll still be Something
 	Something* _s5 = new Someone(*_s4);
-	_s4->changeliveliness(false);               //_s5 doesn't have such method since it's still Something
 
 	//
 
 	printf("\n\nDeleting dynamically created Someones:\n");
 	printf("   Deleting _s4:\n");
 	delete _s4;
-	printf("   Deleting _s5:\n");               //only Something's destructor is called
-	delete _s5;
-
+	printf("   Deleting _s5:\n");               
+	delete _s5;                                 //only Something's destructor is called
+	//                                            if Something's destructor is virtual, both destructors will be called
 	//
 
 	printf("\n\nStatic creation of Heaps:\n");
@@ -183,9 +183,21 @@ int main()
 	Something A1;
 	Something *A2 = new Someone();
 	Something *A3 = new SomethingMeasured();
+
+	//
+
 	printf("\n\nUsing overrided virtual method of each Something\n");
 	A1.show_main();
 	A2->show_main();
 	A3->show_main();
+
+	//
+
+	printf("\n\nDeleting dynamically versions if Something:\n");
+	delete A2;                                         //again only Something's constructor is called
+	delete A3;
+
+	//
+
 	printf("\n\nDeleting statically created Someones, Something, Heaps:\n");
 }
