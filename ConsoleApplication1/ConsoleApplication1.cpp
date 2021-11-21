@@ -3,6 +3,10 @@
 #include <string>
 
 using namespace std;
+string liveliness(bool alive) {
+	if (alive == true)return "alive";
+	else return "lifeless";
+}
 
 class Something {
 protected:
@@ -10,33 +14,55 @@ protected:
 	int age;                            
 public:
 	Something() {
-		name = "default", age = 0;
 		printf("Something()\n");
+		name = "default", age = 0;
 	}
 	Something(string name, int age) {
 		printf("Something(string name, int age)\n");
 		this->name = name, this->age=age;
 	}
 	Something(const Something&S) {
-		name = S.name, age = S.age;
 		printf("Something(const Something &S)\n");
+		name = S.name, age = S.age;
 	}
 	~Something() {
-		cout << "\n~Someone()\nit was a " << age << "-year-old " << name << endl;
+		cout << "~Something()\nit was a " << age << "-year-old " << name << endl;
 	}
 	void rename(string s) {
+		cout << "New name of \"" << name << "\" is \"" << s  <<"\""<< endl;
 		name = s;
 	}
 	void resetC();
 };
 void Something::resetC() {
+	cout << "New age of \"" << name << "\" is \"" << 0 << "\"" << endl;
 	age = 0;
 }
 
-string liveliness(bool alive) {
-	if (alive == true)return "alive ";
-	else return "lifeless ";
-}
+class Heap {
+protected:
+	Something* S1;
+	Something* S2;
+public:
+	Heap(){
+		printf("Heap()");
+		S1 = new Something();
+		S2 = new Something();
+	}
+	Heap(Something S1, Something S2) {
+		printf("Heap(Something* S1, Something * S2)\n");
+		this->S1 = new Something(S1), this->S2 = new Something(S2);
+	}
+	Heap(const Heap& H) {
+		printf("Heap(const Heap& H)\n");
+		S1 = new Something(*(H.S1)), S2 = new Something(*(H.S2));
+	}
+	~Heap() {
+		printf("\n~Heap()\n");
+		delete S1;
+		delete S2;
+	}
+};
 
 class Someone : public Something {
 private: bool alive;
@@ -54,26 +80,46 @@ public:
 		printf("Someone(const Someone &S)\n");
 	}
 	~Someone() {
-		cout << "\n~Someone()\nit was a " << age << "-year-old and " << liveliness(alive) << name << endl;
+		cout << "~Someone()\nit was a " << age << "-year-old and " << liveliness(alive) << " "<< name << endl;
 	}
 	void changeliveliness(bool alive) {
+		cout << "New liveliness of \"" << name << "\" is \"" << liveliness(alive) << "\"" << endl;
 		this->alive = alive;
 	}
 };
 
-class CoupleOfShapes {
-private:
-	Something* A;
-	Something* B;
-public:
-};
-
-
 int main()
 {
-	Someone* A = new Someone("a", 1,true);
-	A->rename("aa");
-	A->resetC();
-	A->changeliveliness(false);
-	delete A;
+	//
+	printf("Static creation of Something:\n");
+	Something s1;
+	Something s2("abc", 1);
+	Something s3(s2);
+	//
+	printf("\n\nDynamic creation of Something:\n");
+	Something* s4 = new Something();
+	Something* s5 = new Something("def",2);
+	Something* s6 = new Something(*s5);
+	s6->rename("defg");
+	s6->resetC();
+	//
+	printf("\n\nDeleting dynamically created Something:\n");
+	delete s4;
+	delete s5;
+	delete s6;
+	//
+	printf("\n\nStatic creation of Someone:\n");
+	Someone _s1;
+	Someone _s2("hij", 3,true);
+	Someone _s3(_s2);
+	printf("\n\nDynamic creation of Someone & putting Someone into the variable of the class Something:\n");
+	Someone* _s4 = new Someone("klm", 4,true);  //each time both of Somathing's and Someone's constructors are called
+	Something* _s5 = new Someone(*_s4);
+	_s4->changeliveliness(false);               //_s5 doesn't have such method since it's still Something
+	printf("\n\nDeleting dynamically created Someone:\n");
+	printf("   Deleting _s4:\n");
+	delete _s4;
+	printf("   Deleting _s5:\n");               //only Something's destructor is called
+	delete _s5;
+	printf("\n\nDeleting statically created Someone and Something:\n");
 }
