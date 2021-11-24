@@ -9,37 +9,45 @@ string liveliness(bool alive) {
 }
 
 class Something {
+private: 
+	string last_change;
 protected:
 	string name;
 	int age;
 public:
-	virtual void show_main() {
-		printf("Here is nothing :(\n");
-	}
 	Something() {
 		printf("Something()\n");
 		name = "default", age = 0;
+		last_change = "Initialized";
 	}
 	Something(string name, int age) {
 		printf("Something(string name, int age)\n");
 		this->name = name, this->age=age;
+		last_change = "Initialized";
 	}
 	Something(const Something&S) {
 		printf("Something(const Something &S)\n");
 		name = S.name, age = S.age;
+		last_change = "Initialized";
 	}
 	~Something() {
 		cout << "~Something()\nit was a " << age << "-year-old " << name << endl;
+		last_change = "Deleted";
+	}
+	virtual void show_main() {
+		printf("Here is nothing :(\n");
 	}
 	void rename(string s) {
 		cout << "New name of \"" << name << "\" is \"" << s  <<"\""<< endl;
 		name = s;
+		last_change = "Name has been changed";
 	}
-	void resetC();
+	void resetA();
 };
-void Something::resetC() {
+void Something::resetA() {
 	cout << "New age of \"" << name << "\" is \"" << 0 << "\"" << endl;
 	age = 0;
+	last_change = "Age has been reseted";
 }
 
 class Heap {
@@ -68,29 +76,36 @@ public:
 };
 
 class Someone : public Something {
-private: bool alive;
+private:
+	string last_change;
+protected: bool alive;
 public:
-	void show_main() override {
-		printf("The main prorerty is liveliness\n");
-	}
 	Someone() : Something() {
 		printf("Someone()\n");
 		alive = true;
+		last_change = "Initialized";
 	}
 	Someone(string name, int age, bool alive) :Something(name, age) {
 		printf("Someone(string name, int age, bool alive)\n");
 		this->alive = alive;
+		last_change = "Initialized";
 	}
 	Someone(const Someone& S) {
 		name = S.name, age = S.age, alive = S.alive;
 		printf("Someone(const Someone &S)\n");
+		last_change = "Initialized";
 	}
 	~Someone() {
 		cout << "~Someone()\nit was a " << age << "-year-old and " << liveliness(alive) << " "<< name << endl;
+		last_change = "Deleted";
 	}
 	void changeliveliness(bool alive) {
 		cout << "New liveliness of \"" << name << "\" is \"" << liveliness(alive) << "\"" << endl;
 		this->alive = alive;
+		last_change = "Liveliness has been changed";
+	}
+	void show_main() override {
+		printf("The main prorerty is liveliness\n");
 	}
 };
 
@@ -107,7 +122,7 @@ int main()
 	//
 
 	printf("Static creation of Something:\n");
-	Something s1;
+	Something s1;                                 //s1.name and s1.age are not accessible as protected properties, s1.last_change as a private one
 	Something s2("abc", 1);
 	Something s3(s2);
 
@@ -118,7 +133,7 @@ int main()
 	Something* s5 = new Something("def",2);
 	Something* s6 = new Something(*s5);
 	s6->rename("defg");
-	s6->resetC();
+	s6->resetA();                                 //
 
 	//
 
@@ -130,15 +145,20 @@ int main()
 	//
 
 	printf("\n\nStatic creation of Someones:\n");
-	Someone _s1;
+	Someone _s1;                                 //_s1.name, _s1.age and _s1.alive are not accessible as protected properties, _s1.last_change as a private one
 	Someone _s2("hij", 3,true);
 	Someone _s3(_s2);
 	//
 
 	printf("\n\nDynamic creation of Someones & putting Someone into the variable of the class Something:\n");
-	Someone* _s4 = new Someone("klm", 4,true);  //each time both of Somathing's and Someone's constructors are called
+	Someone* _s4 = new Someone("klm", 4,true);  //each time both of Something's and Someone's constructors are called
+	_s4->rename("_/S4");          //this and the next line don't change _s4->last_change, because rename() and reset() don't affect Someone's last_change, only Something's
+	_s4->resetA();                //
 	_s4->changeliveliness(false);               //_s5 will not have such method since it'll still be Something
 	Something* _s5 = new Someone(*_s4);
+	_s5->rename("_/S5");          //in this and the next line _s5->last_change is changed, because now it is Something's property
+	_s5->resetA();                //
+	//_s5->changeliveliness(false);   is impossible c:
 
 	//
 
@@ -194,8 +214,8 @@ int main()
 	//
 
 	printf("\n\nDeleting dynamically versions if Something:\n");
-	delete A2;                                         //again only Something's constructor is called
-	delete A3;
+	delete A2;
+	delete A3;                                         //again only Something's destructor is called
 
 	//
 
